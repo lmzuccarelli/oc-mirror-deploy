@@ -1,0 +1,9 @@
+ansible_user: lzuccarelli
+project_dir: Projects
+user_dir: /home/lzuccarelli
+ansible_sudo_pass: Gaasdm06*
+
+repos:
+  - {repo: "https://github.com/openshift/oc-mirror.git", name: "oc-mirror", version: "main"}
+  #- {repo: "https://github.com/lmzuccarelli/rust-image-mirror.git", name: "image-mirror", version: "main"}
+

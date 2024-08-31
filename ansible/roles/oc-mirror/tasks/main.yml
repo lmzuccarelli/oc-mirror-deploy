@@ -1,0 +1,48 @@
+- name: remove project directories
+  ansible.builtin.file:
+    path: '{{ user_dir }}/{{ project_dir }}/{{ item.name }}'
+    state: absent
+  loop: "{{ repos }}"
+  tags: fetch-build
+
+- name: git checkout the project/s
+  ansible.builtin.git:
+    repo: '{{ item.repo }}'
+    dest: '{{ user_dir }}/{{ project_dir }}/{{ item.name }}'
+    version: '{{ item.version }}'
+  loop: "{{ repos }}"
+  tags: fetch-build
+
+- name: install dependencies
+  dnf:
+    name: gpgme-devel
+    state: latest
+  become: true
+  become_user: root
+  tags: 
+  - install-deps
+  - fetch-build
+
+- debug: 
+    var: output
+
+- name: cd into each repo then compile/build
+  shell: 'cd {{ user_dir }}/{{ project_dir }}/{{ item.name }} && make build'
+  register: output
+  with_items: "{{ repos }}"
+  tags: fetch-build
+
+- debug: 
+    var: output
+  tags: fetch-build
+
+- name: display oc-mirror version
+  shell: 'cd {{ user_dir }}/{{ project_dir }}/oc-mirror && bin/oc-mirror version'
+  register: version
+  tags: check
+
+- debug:
+    var: version.stdout_lines
+  tags: check
+
+

@@ -1,0 +1,4 @@
+ansible_user: lzuccarelli
+user_dir: /home/lzuccarelli
+ansible_sudo_pass:
+server_name: mac-fedora

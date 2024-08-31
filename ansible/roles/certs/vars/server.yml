@@ -1,0 +1,7 @@
+password: lmz1234
+domain_file: domain.ext
+subject: "/C=IT/ST=Ancona/L=Ancona/O=LMZ/OU=IT Dev/CN=mac-fedora"
+user_dir: /home/lzuccarelli
+ansible_user: lzuccarelli
+server_name: mac-fedora
+ansible_sudo_pass: 

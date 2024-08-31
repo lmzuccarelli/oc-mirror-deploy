@@ -1,0 +1,7 @@
+---
+- hosts: base
+  vars_files:
+    - roles/golang/vars/main.yml
+  roles:
+    - golang
+

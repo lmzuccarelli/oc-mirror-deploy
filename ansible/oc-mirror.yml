@@ -1,0 +1,8 @@
+---
+- hosts: base
+  vars_files:
+    - roles/oc-mirror/vars/main.yml
+  roles:
+    - oc-mirror
+    
+

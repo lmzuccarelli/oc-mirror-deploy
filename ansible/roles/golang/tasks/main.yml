@@ -1,0 +1,40 @@
+- name: check for golang
+  shell: "go version | awk '{print $3}' | cut -c 3-"
+  register: version
+
+- debug:
+    msg: "current version is {{ go_version }}"
+  when: version is succeeded and go_version == version.stdout
+
+- name: download golang
+  when: version is failed or go_version != version.stdout
+  get_url:
+    url: 'https://go.dev/dl/go{{ go_version }}.{{ os_arch }}.tar.gz'
+    dest: /tmp/go{{ go_version }}.{{ os_arch }}.tar.gz
+    mode: '0755'
+    force: 'yes'
+
+- name: remove older version/s golang 
+  when: version is failed or go_version != version.stdout
+  shell: 'rm -rf /usr/local/go' 
+  become: true
+  become_user: root
+  register: display
+
+- name: untar golang 
+  when: version is failed or go_version != version.stdout
+  shell: 'tar -C /usr/local -xzf go{{ go_version }}.{{ os_arch }}.tar.gz'
+  become: true
+  become_user: root
+  register: display
+  args:
+    chdir: /tmp  
+
+- name: display go version
+  command: "go version"
+  register: version
+
+- debug:
+    var: version.stdout_lines[-1]
+
+

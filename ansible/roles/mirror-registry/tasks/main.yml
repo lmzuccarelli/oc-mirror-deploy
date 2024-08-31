@@ -1,0 +1,45 @@
+- name: check if tar file exists
+  stat:
+    path: "{{ user_dir }}/mirror-registry.tar.gz"
+  register: stat_result
+
+- name: download mirror registry
+  when: not stat_result.stat.exists
+  get_url:
+    url: 'https://developers.redhat.com/content-gateway/file/pub/openshift-v4/clients/mirror-registry/1.3.11/mirror-registry.tar.gz'
+    dest: "{{ user_dir }}/mirror-registry.tar.gz"
+    mode: '0755'
+    force: 'yes'
+
+- name: check if untar folder exists
+  stat:
+    path: "{{ user_dir }}/mirror-registry"
+  register: stat_result_untar
+
+- name: untar mirror-registry
+  when: not stat_result_untar.stat.exists
+  shell: 'tar -xzf mirror-registry.tar.gz'
+  args:
+    chdir: "{{ user_dir }}"
+
+- name: create directory
+  ansible.builtin.file:
+    path: "{{ user_dir }}/mirror-registry-data/storage"
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: 0775
+    recurse: yes
+  become: yes
+
+- name: install mirror-registry
+  shell: './mirror-registry install --quayHostname {{ server_name }} --quayRoot {{ user_dir }}/mirror-registry-data'
+  become: true
+  become_user: root
+  args:
+    chdir: "{{ user_dir }}"
+  register: display
+
+- debug:
+    var: display.stdout_lines[-1]
+

@@ -1,0 +1,6 @@
+---
+- hosts: registry
+  vars_files:
+    - roles/certs/vars/server.yml
+  roles:
+    - certs

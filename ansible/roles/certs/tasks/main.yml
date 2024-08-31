@@ -1,0 +1,150 @@
+- name: ensure directory structure exists
+  file: 
+    path: "{{ user_dir }}/certs"
+    state: directory
+    mode: 0755
+
+- name: copy the openssl config file
+  copy:
+    src: "{{ playbook_dir }}/files/openssl.conf"
+    dest: "{{ user_dir }}/certs/openssl.conf"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: 0755
+
+# this should only be called once
+# reference https://docs.redhat.com/en/documentation/red_hat_quay/3.12/html/manage_red_hat_quay/using-ssl-to-protect-quay#introduction-using-ssl
+- name: generate self signed CA key
+  shell: 'openssl genrsa -out {{ user_dir }}/certs/rootCA.key 2048'
+  register: output
+
+- debug: 
+    var: output
+
+- name: generate root certs
+  shell: 'openssl req -x509 -new -nodes -key {{ user_dir }}/certs/rootCA.key -sha256 -days 1024 -out {{ user_dir }}/certs/rootCA.pem -subj "{{ subject }}"'
+  register: output
+
+- debug: 
+    var: output
+
+- name: generate server key
+  shell: 'openssl genrsa -out {{ user_dir }}/certs/ssl.key 2048'
+  register: output
+
+- debug: 
+    var: output
+
+- name: create a signing request with subject 
+  shell: 'openssl req -new -key {{ user_dir }}/certs/ssl.key -out {{ user_dir }}/certs/ssl.csr -subj "{{ subject }}"'
+  register: output
+
+- debug: 
+    var: output
+
+- name: use openssl config to generate ssl cert 
+  shell: 'openssl x509 -req -in {{ user_dir }}/certs/ssl.csr -CA {{ user_dir }}/certs/rootCA.pem -CAkey {{ user_dir }}/certs/rootCA.key -CAcreateserial -out {{ user_dir }}/certs/ssl.cert -days 356 -extensions v3_req -extfile {{ user_dir }}/certs/openssl.conf -passin pass:{{ password }}'
+  register: output
+ 
+- debug: 
+    var: output
+
+- name: copy the ssl cert and key to mirror-registry config
+  copy:
+    src: "{{ user_dir }}/certs/{{ item }}"
+    dest: "{{ user_dir }}/mirror-registry-data/quay-config/"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: 0600
+    remote_src: yes
+  become: true
+  become_user: root
+  register: output 
+  with_items: 
+  - ssl.cert
+  - ssl.key
+
+- debug: 
+    var: output
+
+- name: create container server certs dir
+  file: 
+    path: "/etc/containers/certs.d/{{ server_name }}"
+    state: directory
+    mode: 0755
+
+- name: copy rootCA to containers cert.d folder
+  copy:
+    src: "{{ user_dir }}/certs/rootCA.pem"
+    dest: "/etc/containers/certs.d/{{ server_name }}/ca.crt"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: 0600
+    remote_src: yes
+  become: true
+  become_user: root
+  register: output 
+
+- debug: 
+    var: output
+
+- name: copy rootCA to system wide trust store
+  copy:
+    src: "{{ user_dir }}/certs/rootCA.pem"
+    dest: "/etc/pki/ca-trust/source/anchors/quayCA.pem"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: 0600
+    remote_src: yes
+  become: true
+  become_user: root
+  register: output 
+
+- debug: 
+    var: output
+
+- name: update trusted store
+  shell: "sudo update-ca-trust extract"
+  become: true
+  become_user: root
+  register: output 
+
+- debug: 
+    var: output
+
+- name: copy rootCA from registry (remote to master)
+  run_once: yes
+  fetch: src={{ user_dir }}/certs/rootCA.pem dest={{ playbook_dir }} flat=yes
+  when: "{{ inventory_hostname == 'registry' }}"
+
+- name: copy the rootCA to base (master to remote)
+  copy: src={{ playbook_dir }}/rootCA.pem  dest=/tmp/
+  when: "{{ inventory_hostname == 'base' }}"
+
+- name: copy rootCA to system wide trust store
+  copy:
+    src: "/tmp/rootCA.pem"
+    dest: "/etc/pki/ca-trust/source/anchors/quayCA.pem"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: 0600
+    remote_src: yes
+  become: true
+  become_user: root
+  register: output 
+  when: "{{ inventory_hostname == 'base' }}"
+
+- debug: 
+    var: output
+
+- name: update trusted store
+  shell: "sudo update-ca-trust extract"
+  become: true
+  become_user: root
+  register: output 
+  when: "{{ inventory_hostname == 'base' }}"
+
+- debug: 
+    var: output
+
+

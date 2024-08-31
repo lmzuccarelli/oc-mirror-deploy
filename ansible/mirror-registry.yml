@@ -1,0 +1,7 @@
+---
+- hosts: registry
+  vars_files:
+    - roles/mirror-registry/vars/main.yml
+  roles:
+    - mirror-registry
+
