@@ -39,7 +39,7 @@ ansible-playbook oc-mirror.yml -i inventories/remotes
 
 Execute the following playbooks (in the given order)
 
-This will downlaod and install the lates version of the mirror-registry, and finally install a rootCA to avaoid problems with x509 self signed certificates
+This will download and install the latest version of the mirror-registry, and finally install a rootCA to avoid problems with x509 self signed certificates
 
 
 ```
@@ -48,7 +48,7 @@ ansible-playbook certs.yml -i inventories/remotes
 ```
 
 If you are still having problems with the x509 self signed cert error, try stopping and restarting the quay-app by ssh'ing into the remote server
-and executing the following command.
+and executing the following command
 
 ```
 sudo systemctl restart quay-app
