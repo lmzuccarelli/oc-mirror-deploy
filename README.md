@@ -23,6 +23,8 @@ ansible
 
 For sudo you will need to add your sudo password in the field *ansible_sudo_pass*
 
+Optionally you could execute the *setup.sh* script that will update all the var files using sed, add and update as you see fit
+
 
 ## Install oc-mirror clone, build, deploy, oc-mirror binary
 
@@ -67,3 +69,10 @@ Execute it using the relevant step
 ./pipeline.sh 2
 # and so on
 ```
+
+## Final setup
+
+Once logged into the quay mirror-registry (using podman to generate auth.json file found in $XDG_RUNTIME_DIR/containers/), 
+merge this with your main auth.json file, obtained from pull secrets found at https://console.redhat.com/openshift/install/pull-secret).
+
+The ansible playbook does not set /etc/hosts - this will need to added manually to resolve host names.
