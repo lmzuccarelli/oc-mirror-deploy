@@ -26,9 +26,11 @@ For sudo you will need to add your sudo password in the field *ansible_sudo_pass
 Optionally you could execute the *setup.sh* script that will update all the var files using sed, add and update as you see fit
 
 
-## Install oc-mirror clone, build, deploy, oc-mirror binary
+## Install oc-mirror binary
 
 Execute the following playbooks (in the given order)
+
+**NB** There is a dependency to install gpgme-devel (Fedora specific). Change this to comply with the linux distribution package manager thats appropriate.
 
 ### Install golang (if needed) and then clone and build oc-mirror
 
@@ -38,6 +40,8 @@ ansible-playbook oc-mirror.yml -i inventories/remotes
 ```
 
 ## Install mirror-registry
+
+Before sarting ensure the ip address and hostname are set (etc/hosts), also update the playbook vars file with the server name and ip
 
 Execute the following playbooks (in the given order)
 
@@ -70,9 +74,12 @@ Execute it using the relevant step
 # and so on
 ```
 
-## Final setup
+## Final setup checklist 
 
 Once logged into the quay mirror-registry (using podman to generate auth.json file found in $XDG_RUNTIME_DIR/containers/), 
 merge this with your main auth.json file, obtained from pull secrets found at https://console.redhat.com/openshift/install/pull-secret).
 
 The ansible playbook does not set /etc/hosts - this will need to added manually to resolve host names.
+
+Remember to copy the rootCA cert from the remote mirror-registry machine to the base machine (that will be executing the oc-mirror binary).
+The script does a fetch, push and copy of the rootCA, but it hasn't been verified.

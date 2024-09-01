@@ -1,4 +1,4 @@
-password: lmz1234
+password: 
 subject: "/C=IT/ST=ANCONA/L=ANCONA/O=QUAY/OU=IT Dev/CN=mac-fedora"
 user_dir: /home/lzuccarelli
 ansible_user: lzuccarelli
