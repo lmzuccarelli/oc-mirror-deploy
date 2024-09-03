@@ -30,6 +30,14 @@
   args:
     chdir: /tmp  
 
+- name: save go path to profile
+  when: version is failed or go_version != version.stdout
+  shell: "echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc && source ~/.bashrc"
+  register: output
+
+- debug:
+    var: output
+  
 - name: display go version
   command: "go version"
   register: version
