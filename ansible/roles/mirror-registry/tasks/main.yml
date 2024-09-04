@@ -39,6 +39,8 @@
   args:
     chdir: "{{ user_dir }}"
   register: display
+  async: 1000
+  poll: 0
 
 - debug:
     var: display.stdout_lines[-1]
