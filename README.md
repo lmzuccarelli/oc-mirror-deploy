@@ -43,15 +43,21 @@ ansible-playbook oc-mirror.yml -i inventories/remotes
 
 Before sarting ensure the ip address and hostname are set (etc/hosts), also update the playbook vars file with the server name and ip
 
-Execute the following playbooks (in the given order)
+Execute the following playbook
 
 This will download and install the latest version of the mirror-registry, and finally install a rootCA to avoid problems with x509 self signed certificates
 
+**NB** the certs playbook is no longer needed. I found that by copying the already created rootCA to
+the containers directory and to the trusted wide store this works.
+
+Use the certs playbook for more customization, it still gives a startup error (quay-app) with
+*ssl.cert is required for HostSettings* - this is still a WIP
 
 ```
 ansible-playbook mirror-registry.yml -i inventories/remotes 
-ansible-playbook certs.yml -i inventories/remotes 
 ```
+
+In the final display take not of the line credentails (init,xxx) - where xxx is the password, you will need it to login into Podman to create the auth.json
 
 If you are still having problems with the x509 self signed cert error, try stopping and restarting the quay-app by ssh'ing into the remote server
 and executing the following command
@@ -78,6 +84,11 @@ Execute it using the relevant step
 
 Once logged into the quay mirror-registry (using podman to generate auth.json file found in $XDG_RUNTIME_DIR/containers/), 
 merge this with your main auth.json file, obtained from pull secrets found at https://console.redhat.com/openshift/install/pull-secret).
+i.e you could try something like this
+
+```
+podman login <server_name>:8443 --authfile $XDG_RUNTIME_DIR/containers/auth.json --tls-verify=false
+```
 
 The ansible playbook does not set /etc/hosts - this will need to added manually to resolve host names.
 

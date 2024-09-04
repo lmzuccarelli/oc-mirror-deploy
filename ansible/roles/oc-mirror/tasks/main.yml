@@ -5,6 +5,18 @@
   loop: "{{ repos }}"
   tags: fetch-build
 
+- name: check os release and version
+  shell: 'uname -a | grep -o {{ os }}'
+  register: os_release
+
+- debug:
+    msg: "current os is {{ os_release.stdout }}"
+
+- name: update subscription manager (rhel9)
+  when: os_release.stdout == 'el9'
+  shell: "subscription-manager repos --enable codeready-builder-for-rhel-9-x86_64-rpms"
+  register: subscription
+
 - name: git checkout the project/s
   ansible.builtin.git:
     repo: '{{ item.repo }}'
@@ -15,13 +27,18 @@
 
 - name: install dependencies
   dnf:
-    name: gpgme-devel
+    name: 
+    - gppme-devel
+    - binutils
+    - ansible-core
+    - make
     state: latest
   become: true
   become_user: root
   tags: 
   - install-deps
   - fetch-build
+
 
 - debug: 
     var: output

@@ -40,8 +40,54 @@
     chdir: "{{ user_dir }}"
   register: display
   async: 1000
-  poll: 0
+  poll: 20
 
 - debug:
-    var: display.stdout_lines[-1]
+    var: display
 
+- name: create container server certs dir
+  file: 
+    path: "/etc/containers/certs.d/{{ server_name }}"
+    state: directory
+    mode: 0755
+  become: true
+  become_user: root
+
+- name: copy rootCA to containers cert.d folder
+  copy:
+    src: "{{ user_dir }}/mirror-registry-data/quay-rootCA/rootCA.pem"
+    dest: "/etc/containers/certs.d/{{ server_name }}/ca.crt"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: 0600
+    remote_src: yes
+  become: true
+  become_user: root
+  register: output 
+
+- debug: 
+    var: output
+
+- name: copy rootCA to system wide trust store
+  copy:
+    src: "{{ user_dir }}/mirror-registry-data/quay-rootCA/rootCA.pem"
+    dest: "/etc/pki/ca-trust/source/anchors/quayCA.pem"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: 0600
+    remote_src: yes
+  become: true
+  become_user: root
+  register: output 
+
+- debug: 
+    var: output
+
+- name: update trusted store
+  shell: "sudo update-ca-trust extract"
+  become: true
+  become_user: root
+  register: output 
+
+- debug: 
+    var: output
