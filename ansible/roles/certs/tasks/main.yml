@@ -72,6 +72,8 @@
     path: "/etc/containers/certs.d/{{ server_name }}"
     state: directory
     mode: 0755
+  become: true
+  become_user: root
 
 - name: copy rootCA to containers cert.d folder
   copy:
@@ -116,10 +118,14 @@
   run_once: yes
   fetch: src={{ user_dir }}/certs/rootCA.pem dest={{ playbook_dir }} flat=yes
   when: "{{ inventory_hostname == 'registry' }}"
+  become: true
+  become_user: root
 
 - name: copy the rootCA to base (master to remote)
   copy: src={{ playbook_dir }}/rootCA.pem  dest=/tmp/
   when: "{{ inventory_hostname == 'base' }}"
+  become: true
+  become_user: root
 
 - name: copy rootCA to system wide trust store
   copy:
