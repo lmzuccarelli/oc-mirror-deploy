@@ -91,3 +91,19 @@
 
 - debug: 
     var: output
+
+- name: copy rootCA to master node (to push to base remote later)
+  copy:
+    src: "{{ user_dir }}/mirror-registry-data/quay-rootCA/rootCA.pem"
+    dest: "{{ user_dir }}/quayCA.pem"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: 0600
+  become: true
+  become_user: root
+  register: output 
+
+- debug: 
+    var: output
+
+
