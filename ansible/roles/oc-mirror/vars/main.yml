@@ -1,9 +1,12 @@
 ansible_user: lzuccarelli
 project_dir: Projects
 user_dir: /home/lzuccarelli
-ansible_sudo_pass:
-#os: el9
-os: fc40
+ansible_sudo_pass: 
+os: el9  
+# os variable values
+#os: el9  // rhel9
+#os: fc40 // fedora 40
+#os: el8  // rhel8
 
 repos:
   - {repo: "https://github.com/openshift/oc-mirror.git", name: "oc-mirror", version: "main"}

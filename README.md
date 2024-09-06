@@ -39,6 +39,8 @@ ansible-playbook golang.yml -i inventories/remotes
 ansible-playbook oc-mirror.yml -i inventories/remotes 
 ```
 
+This has been tested on Fedora 40 and Rhel9 
+
 ## Install mirror-registry
 
 Before sarting ensure the ip address and hostname are set (etc/hosts), also update the playbook vars file with the server name and ip

@@ -14,8 +14,39 @@
 
 - name: update subscription manager (rhel9)
   when: os_release.stdout == 'el9'
-  shell: "subscription-manager repos --enable codeready-builder-for-rhel-9-x86_64-rpms"
+  command: "subscription-manager repos --enable codeready-builder-for-rhel-9-x86_64-rpms"
   register: subscription
+  become: true
+  become_user: root
+
+- name: update subscription manager (rhel9)
+  when: os_release.stdout == 'el8'
+  command: "subscription-manager repos --enable codeready-builder-for-rhel-8-x86_64-rpms"
+  register: subscription
+  become: true
+  become_user: root
+
+- debug:
+    var: subscription
+
+- name: install dependencies
+  dnf:
+    name: 
+    - gpgme-devel
+    - binutils
+    - ansible-core
+    - make
+    - git
+    state: latest
+  become: true
+  become_user: root
+  register: output
+  tags: 
+  - install-deps
+  - fetch-build
+
+- debug: 
+    var: output
 
 - name: git checkout the project/s
   ansible.builtin.git:
@@ -25,24 +56,6 @@
   loop: "{{ repos }}"
   tags: fetch-build
 
-- name: install dependencies
-  dnf:
-    name: 
-    - gppme-devel
-    - binutils
-    - ansible-core
-    - make
-    - git
-    state: latest
-  become: true
-  become_user: root
-  tags: 
-  - install-deps
-  - fetch-build
-
-
-- debug: 
-    var: output
 
 - name: cd into each repo then compile/build
   shell: 'cd {{ user_dir }}/{{ project_dir }}/{{ item.name }} && make build'
