@@ -37,6 +37,7 @@
     - ansible-core
     - make
     - git
+    - gcc
     state: latest
   become: true
   become_user: root
@@ -58,10 +59,12 @@
 
 
 - name: cd into each repo then compile/build
-  shell: 'cd {{ user_dir }}/{{ project_dir }}/{{ item.name }} && make build'
+  shell: 'cd {{ user_dir }}/{{ project_dir }}/{{ item.name }} && CGO_ENABLED=1 make build'
   register: output
   with_items: "{{ repos }}"
   tags: fetch-build
+  async: 1000
+  poll: 30
 
 - debug: 
     var: output
@@ -71,6 +74,7 @@
   shell: 'cd {{ user_dir }}/{{ project_dir }}/oc-mirror && bin/oc-mirror version'
   register: version
   tags: check
+  
 
 - debug:
     var: version.stdout_lines
