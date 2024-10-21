@@ -43,7 +43,7 @@ This has been tested on Fedora 40 and Rhel9
 
 ## Install mirror-registry
 
-Before sarting ensure the ip address and hostname are set (etc/hosts), also update the playbook vars file with the server name and ip
+Before starting ensure the ip address and hostname are set (etc/hosts), also update the playbook vars file with the server name and ip
 
 Execute the following playbook
 
@@ -70,17 +70,6 @@ sudo systemctl restart quay-app
 
 If the error still persists try installing the ssl certs and rootCA manually following the instructions here  https://docs.redhat.com/en/documentation/red_hat_quay/3.12/html/manage_red_hat_quay/using-ssl-to-protect-quay#configuring-ssl-using-cli
 
-### Pipeline script
-
-I have included a simple pipeline script that includes all the ansible playbooks as indicated above
-
-Execute it using the relevant step
-
-```
-./pipeline.sh 1
-./pipeline.sh 2
-# and so on
-```
 
 ## Final setup checklist 
 
